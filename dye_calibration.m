@@ -2,7 +2,7 @@ clc;
 clear;
 close all;
 
-%% Step 1: Read Excel file
+%% Read Excel file
 data = readtable('calibration3.xlsx');
 
 imageNames = data.filename;
@@ -10,7 +10,7 @@ concentration = data.concentration;
 
 n = length(imageNames);
 
-%% Step 2: Read reference image (first image, no dye)
+%% Read reference image (first image, no dye)
 refPath = fullfile('calibration_photos_3', imageNames{1});
 refImg = im2double(imread(refPath));
 
@@ -21,7 +21,7 @@ refImg = refImg(1001:end-200, :, :);
 epsilon = 1e-6;
 refImg = refImg + epsilon;
 
-%% Step 3: Initialize storage
+%% Initialize storage
 R_mean = zeros(n,1);
 G_mean = zeros(n,1);
 B_mean = zeros(n,1);
@@ -30,7 +30,7 @@ R_std = zeros(n,1);
 G_std = zeros(n,1);
 B_std = zeros(n,1);
 
-%% Step 4: Loop through images
+%% Loop through images
 for i = 1:n
     
     imgPath = fullfile('calibration_photos_3', imageNames{i});
@@ -63,7 +63,7 @@ for i = 1:n
     B_std(i) = std(B(:));
 end
 
-%% Step 4.5: Group repeated measurements
+%% Group repeated measurements
 [unique_conc, ~, idx_group] = unique(concentration);
 n_groups = length(unique_conc);
 
@@ -92,7 +92,7 @@ for j = 1:n_groups
     B_group_std(j) = sqrt(mean(B_std(group_idx).^2));
 end
 
-%% Step 5: Write calibration CSV
+%% Write calibration CSV
 % Main calibration table
 calibrationTable = table( ...
     unique_conc, ...
@@ -109,7 +109,7 @@ writetable(calibrationTable, 'rgb_concentration_calibration.csv');
 
 disp('Saved rgb_concentration_calibration.csv');
 
-%% Step 6: Log-scale plots
+%% Log-scale plots
 figure;
 
 subplot(3,2,1);
@@ -154,7 +154,7 @@ ylabel('Green Channel (log)');
 title('Green vs Concentration (Log Scale)');
 grid on;
 
-%% Step 7: Weighted linear regression on Blue (log scale)
+%% Weighted linear regression on Blue (log scale)
 fit_idx = unique_conc >= 0 & unique_conc <= 0.8e-3;
 
 x = unique_conc(fit_idx);
@@ -223,7 +223,7 @@ annotation('textbox', [0.15, 0.01, 0.7, 0.05], ...
 
 hold off;
 
-%% Step 8: Save blue-fit model to CSV
+%% Save blue-fit model to CSV
 blueFitTable = table(m, m_err, b, b_err, R2, ...
     'VariableNames', {'slope_m', 'slope_unc', 'intercept_b', 'intercept_unc', 'R_squared'});
 
